@@ -3,9 +3,16 @@ package main
 // #cgo CFLAGS: -I./../../../../../../Downloads/cef_binary_3.2883.1539.gd7f087e_linux64/
 // #cgo LDFLAGS: -lcef -L/home/gzunino/Downloads/cef_binary_3.2883.1539.gd7f087e_linux64/Release/
 // #include <stdlib.h>
+// #include <stdio.h>
+// #include "include/capi/cef_browser_process_handler_capi.h"
 // #include "include/capi/cef_app_capi.h"
-//
 // typedef struct _cef_browser_process_handler_t* (*get_browser_process_handler)(struct _cef_app_t* self);
+// extern void Callback();
+// struct _cef_browser_process_handler_t* go_get_browser_process_handler(struct _cef_app_t* self) {
+//      printf("in go_get_browser_process_handler\n");
+//      Callback();
+//      return 0;
+// }
 import "C"
 import (
 	"fmt"
@@ -14,10 +21,10 @@ import (
 
 var _Argv []*C.char = make([]*C.char, len(os.Args))
 
-// export
-func GetBrowserProcessHandler(self *C.struct__cef_app_t) *C.struct__cef_browser_process_handler_t {
-	return nil
-}
+//export GetBrowserProcessHandler
+//func GetBrowserProcessHandler(self *C.struct__cef_app_t) *C.struct__cef_browser_process_handler_t {
+//	return nil
+//}
 
 func main() {
 	fmt.Println("IN GO")
@@ -46,10 +53,12 @@ func main() {
 	_AppHandler = (*C.cef_app_t)(
 		C.calloc(1, C.sizeof_cef_app_t))
 
-	f := C.get_browser_process_handler(GetBrowserProcessHandler)
+	//C.go_get_browser_process_handler(nil)
+
+	f := C.get_browser_process_handler(C.go_get_browser_process_handler)
 	//f := getBrowserProcessHandler
 	//fp := unsafe.Pointer(&f)
-	//_AppHandler.get_browser_process_handler = fp
+	_AppHandler.get_browser_process_handler = f
 
 	fmt.Println("cef_initialize")
 	C.cef_initialize(_MainArgs, cefSettings, _AppHandler, nil)
@@ -80,7 +89,7 @@ func fillMainArgs(mainArgs *C.struct__cef_main_args_t) {
 func createSettings(cefSettings *C.struct__cef_settings_t) {
 	//C.cef_string_from_utf8(cachePath, C.strlen(cachePath), &cefSettings.cache_path)
 
-	//cefSettings.log_severity = (C.cef_log_severity_t)(C.int(settings.LogSeverity))
+	cefSettings.log_severity = (C.cef_log_severity_t)(C.int(1))
 
 	//var logFile *C.char = C.CString("")
 	//defer C.free(unsafe.Pointer(logFile))
